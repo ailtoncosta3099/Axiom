@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+import base64
+
+svg_192 = '''<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#080810"/>
+  <rect x="8" y="8" width="176" height="176" rx="26" fill="url(#g1)"/>
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f2a1a"/>
+      <stop offset="100%" style="stop-color:#0a1a2a"/>
+    </linearGradient>
+  </defs>
+  <text x="96" y="82" font-family="Georgia,serif" font-size="28" font-weight="bold" fill="#4ade80" text-anchor="middle">AX</text>
+  <text x="96" y="116" font-family="Georgia,serif" font-size="28" font-weight="bold" fill="#22d3ee" text-anchor="middle">IOM</text>
+  <rect x="36" y="128" width="120" height="2" rx="1" fill="url(#g2)"/>
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4ade80;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#22d3ee"/>
+      <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+  <text x="96" y="156" font-family="monospace" font-size="10" fill="#2a5a3a" text-anchor="middle" letter-spacing="3">FLUENCY</text>
+</svg>'''
+
+svg_512 = svg_192.replace('width="192" height="192" viewBox="0 0 192 192"', 'width="512" height="512" viewBox="0 0 192 192"')
+
+with open('/home/claude/axiom-pwa/icons/icon-192.svg', 'w') as f:
+    f.write(svg_192)
+with open('/home/claude/axiom-pwa/icons/icon-512.svg', 'w') as f:
+    f.write(svg_512)
+
+print("SVG icons created")

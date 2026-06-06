@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#080810"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="AXIOM"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>AXIOM — English Fluency Engine</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="icons/icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#080810}
+body{font-family:'Crimson Pro',Georgia,serif;color:#e8e8e0;display:flex;flex-direction:column;height:100dvh}
+
+:root{
+  --green:#4ade80;--cyan:#22d3ee;--purple:#a78bfa;--amber:#f59e0b;
+  --red:#ef4444;--pink:#ec4899;--blue:#3b82f6;
+  --bg:#080810;--surface:rgba(255,255,255,0.03);--border:#1a2a1a;
+  --mono:'IBM Plex Mono',monospace;--serif:'Crimson Pro',Georgia,serif;
+  --display:'Playfair Display',Georgia,serif;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1a3a2a;border-radius:2px}
+
+/* ── HEADER ── */
+#header{
+  padding:12px 16px;border-bottom:1px solid #0d1a0d;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;background:rgba(8,8,16,0.95);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:100;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,#15803d,#0891b2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.brand-title{font-family:var(--display);font-weight:900;font-size:18px;letter-spacing:-0.5px;background:linear-gradient(135deg,var(--green),var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand-sub{font-family:var(--mono);font-size:8px;color:#2a5a2a;letter-spacing:2px;margin-top:1px}
+.header-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.badge-level{background:rgba(74,222,128,0.1);border:1px solid #1a4a2a;color:var(--green)}
+.badge-day{background:rgba(167,139,250,0.1);border:1px solid #2a1a4a;color:var(--purple)}
+.btn-back{background:transparent;border:1px solid #1a2a1a;border-radius:7px;color:#5a7a5a;cursor:pointer;font-family:var(--mono);font-size:10px;padding:5px 10px;letter-spacing:.5px}
+
+/* ── SCREENS ── */
+#app{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.screen{flex:1;overflow-y:auto;padding:16px;display:none}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── LEVEL SCREEN ── */
+.screen-title{font-family:var(--display);font-size:20px;font-weight:700;margin-bottom:4px;text-align:center}
+.screen-sub{font-family:var(--serif);font-size:14px;color:#4a6a4a;font-style:italic;text-align:center;margin-bottom:20px}
+.level-card{border-radius:10px;padding:14px 16px;margin-bottom:8px;border:1px solid;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:12px}
+.level-card:active{transform:scale(0.98)}
+.level-id{font-family:var(--mono);font-size:20px;font-weight:600;min-width:40px}
+.level-info{}
+.level-name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1px;margin-bottom:3px}
+.level-desc{font-family:var(--serif);font-size:13px;color:#5a7a5a;line-height:1.4}
+.level-focus{font-family:var(--serif);font-size:12px;color:#3a5a3a;margin-top:3px;font-style:italic}
+.level-check{margin-left:auto;font-size:16px;flex-shrink:0}
+
+/* ── MODE SCREEN ── */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.mode-card{border:1px solid #1a2a1a;border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:all .2s}
+.mode-card:active{transform:scale(0.97)}
+.mode-icon{font-size:20px;margin-bottom:7px}
+.mode-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;margin-bottom:4px}
+.mode-desc{font-family:var(--serif);font-size:12px;color:#4a6a4a;line-height:1.4}
+.config-box{border-radius:10px;padding:14px;margin-bottom:10px}
+.config-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;margin-bottom:8px}
+.config-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:20px;border:1px solid;cursor:pointer;transition:all .2s}
+.chip:active{transform:scale(0.96)}
+select{background:#080810;border:1px solid #1a3a2a;border-radius:8px;color:var(--amber);font-family:var(--mono);font-size:11px;padding:8px 10px;width:100%;outline:none}
+
+/* ── CHAT SCREEN ── */
+#chat-screen{padding:0}
+#messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.msg-user{align-self:flex-end;background:linear-gradient(135deg,#1a3a2a,#0f2a1a);border:1px solid #2a5a3a;border-radius:16px 16px 4px 16px;padding:12px 16px;max-width:85%;font-family:var(--serif);font-size:16px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word}
+.msg-ai{align-self:flex-start;background:rgba(255,255,255,0.03);border:1px solid #1a2a2a;border-radius:4px 16px 16px 16px;padding:14px 18px;max-width:93%;font-family:var(--serif);font-size:15px;line-height:1.7;word-wrap:break-word}
+.msg-ai strong{color:#86efac}
+.msg-ai em{color:#93c5fd;font-style:italic}
+.msg-ai hr{border:none;border-top:1px solid #1a3a2a;margin:10px 0}
+.lab-hdr{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:1px;display:block;margin-bottom:4px}
+.typing{display:flex;align-items:center;gap:4px;padding:14px 18px}
+.typing span{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+/* ── INPUT BAR ── */
+#input-bar{border-top:1px solid #0d1a0d;padding:10px 12px;background:rgba(8,8,16,0.97);backdrop-filter:blur(10px);flex-shrink:0}
+#tip{font-family:var(--mono);font-size:9px;color:#1a4a2a;margin-bottom:7px;letter-spacing:.3px;line-height:1.4}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+#msg-input{background:rgba(255,255,255,0.04);border:1px solid #1a3a2a;border-radius:12px;color:#e8e8e0;font-family:var(--serif);font-size:16px;padding:10px 14px;resize:none;outline:none;flex:1;line-height:1.5;max-height:120px;overflow-y:auto;transition:border-color .2s}
+#msg-input:focus{border-color:#2a6a4a}
+#msg-input::placeholder{color:#2a4a2a}
+#send-btn{background:linear-gradient(135deg,#15803d,#0d4a2a);border:none;border-radius:10px;color:var(--green);cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.5px;padding:10px 14px;min-width:60px;height:44px;transition:all .2s;flex-shrink:0}
+#send-btn:active{transform:scale(0.96)}
+#send-btn:disabled{opacity:.35}
+#hint{font-family:var(--mono);font-size:9px;color:#0f2a0f;text-align:right;margin-top:5px}
+
+/* ── RESOURCES SCREEN ── */
+.res-level-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;justify-content:center}
+.res-tab{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:20px;border:1px solid #1a2a1a;cursor:pointer;transition:all .2s;background:transparent;color:#3a6a3a}
+.res-tab.active{color:var(--green);border-color:var(--green);background:rgba(74,222,128,0.08)}
+.res-section{margin-bottom:18px}
+.res-section-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:#2a5a3a;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #0f1f0f}
+.res-card{background:var(--surface);border:1px solid #1a2a1a;border-radius:8px;padding:12px 14px;margin-bottom:7px}
+.res-name{font-family:var(--mono);font-size:12px;color:var(--cyan);margin-bottom:4px}
+.res-why{font-family:var(--serif);font-size:13px;color:#4a6a4a;line-height:1.4}
+.res-link{color:var(--cyan);text-decoration:none;font-family:var(--mono);font-size:12px}
+.app-chip{display:inline-flex;font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:20px;background:rgba(74,222,128,0.07);border:1px solid #1a4a2a;color:var(--green);margin:3px}
+.plan-row{font-family:var(--mono);font-size:11px;color:#3a7a4a;padding:5px 0;border-bottom:1px solid #0a1a0a;line-height:1.5}
+.plan-row:last-child{border-bottom:none}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeUp .25s ease forwards}
+
+/* ── INSTALL BANNER ── */
+#install-banner{display:none;background:linear-gradient(135deg,#0f2a1a,#0a1a2a);border-top:1px solid #1a3a2a;padding:10px 16px;flex-shrink:0;align-items:center;justify-content:space-between;gap:10px}
+#install-banner.show{display:flex}
+.install-text{font-family:var(--mono);font-size:11px;color:#4ade80}
+.install-btn{background:var(--green);border:none;border-radius:8px;color:#080810;font-family:var(--mono);font-size:11px;font-weight:600;padding:7px 14px;cursor:pointer;letter-spacing:.5px}
+.install-x{background:transparent;border:none;color:#2a5a2a;font-size:18px;cursor:pointer;padding:0 4px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="brand">
+    <div class="brand-icon">🎓</div>
+    <div>
+      <div class="brand-title">AXIOM</div>
+      <div class="brand-sub">ENGLISH FLUENCY ENGINE</div>
+    </div>
+  </div>
+  <div class="header-badges">
+    <span class="badge badge-level" id="badge-level" style="display:none"></span>
+    <span class="badge badge-day" id="badge-day">DAY 1</span>
+    <button class="btn-back" id="btn-back" style="display:none" onclick="goBack()">↩</button>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- ══ SCREEN: LEVEL ══ -->
+  <div class="screen active" id="screen-level">
+    <div class="screen-title">Choose Your Level</div>
+    <div class="screen-sub">Honest self-assessment accelerates your journey.</div>
+    <div id="level-list"></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px;padding-bottom:8px">
+      <button class="btn-back" onclick="adjustDay(-1)">− Day</button>
+      <span style="font-family:var(--mono);color:var(--purple);font-size:13px" id="day-display">Day 1</span>
+      <button class="btn-back" style="color:var(--purple);border-color:#2a1a4a" onclick="adjustDay(1)">+ Day</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: MODE ══ -->
+  <div class="screen" id="screen-mode">
+    <div class="screen-title">Training Mode</div>
+    <div class="screen-sub" id="mode-sub">Select your session type.</div>
+    <div class="mode-grid" id="mode-grid"></div>
+
+    <!-- Drill chips -->
+    <div class="config-box" style="background:rgba(6,182,212,0.05);border:1px solid #0a2a3a">
+      <div class="config-label" style="color:#06b6d4">🧠 DRILL TYPE</div>
+      <div class="config-chips" id="drill-chips"></div>
+    </div>
+
+    <!-- Negotiation role -->
+    <div class="config-box" style="background:rgba(245,158,11,0.05);border:1px solid #2a2a1a;margin-bottom:0">
+      <div class="config-label" style="color:var(--amber)">🤝 NEGOTIATION COUNTERPART</div>
+      <select id="neg-role">
+        <option>CFO — questioning your department budget</option>
+        <option>International Client — negotiating contract terms</option>
+        <option>Vendor — pushing back on payment terms</option>
+        <option>Board Member — challenging your project proposal</option>
+        <option>HR Director — salary negotiation</option>
+        <option>Procurement Director — strategic partnership</option>
+        <option>Port Authority Inspector — compliance discussion</option>
+        <option>Foreign Engineering Partner — EPC scope alignment</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: CHAT ══ -->
+  <div class="screen" id="chat-screen">
+    <div id="messages"></div>
+    <div class="typing msg-ai" id="typing" style="display:none">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: RESOURCES ══ -->
+  <div class="screen" id="screen-resources">
+    <div class="screen-title">Resources & Tools</div>
+    <div class="screen-sub">Curated for your level. Tap a level to switch.</div>
+    <div class="res-level-tabs" id="res-tabs"></div>
+    <div id="res-content"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- INPUT BAR (chat only) -->
+<div id="input-bar" style="display:none">
+  <div id="tip">💡 Loading tip...</div>
+  <div class="input-row">
+    <textarea id="msg-input" placeholder="Write in English… AXIOM corrects you." rows="1"></textarea>
+    <button id="send-btn" onclick="sendMessage()">SEND ↗</button>
+  </div>
+  <div id="hint">ENTER = send · SHIFT+ENTER = new line · DEBRIEF = analysis · PAUSE = Portuguese</div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <div class="install-text">📲 Add AXIOM to your home screen</div>
+  <button class="install-btn" id="install-btn">Install</button>
+  <button class="install-x" onclick="document.getElementById('install-banner').classList.remove('show')">×</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const LEVELS = [
+  {id:"A1",color:"#6b7280",border:"#374151",bg:"rgba(107,114,128,0.1)",desc:"Basic greetings, numbers, simple present tense.",focus:"Survival English — introduce yourself, basic workplace phrases.",mod:"Use VERY simple A1 vocabulary. Short sentences. Be warm and encouraging."},
+  {id:"A2",color:"#3b82f6",border:"#1e3a5f",bg:"rgba(59,130,246,0.08)",desc:"Past tense, simple questions, describing routines.",focus:"Functional English — describe your job, write simple emails.",mod:"Use A2 level. Introduce past tense, simple questions, common workplace vocabulary."},
+  {id:"B1",color:"#10b981",border:"#065f46",bg:"rgba(16,185,129,0.08)",desc:"Express opinions, handle familiar situations, structured emails.",focus:"Conversational English — meetings, emails, basic negotiation.",mod:"Use B1 level. Teach conditionals, modal verbs, linking expressions, professional vocabulary."},
+  {id:"B2",color:"#f59e0b",border:"#78350f",bg:"rgba(245,158,11,0.08)",desc:"Complex arguments, nuanced writing, confident professional communication.",focus:"Professional English — negotiations, presentations, persuasive emails.",mod:"Use B2 level. Push for hedging language, passive voice, complex sentences. Student should argue and persuade."},
+  {id:"C1",color:"#8b5cf6",border:"#4c1d95",bg:"rgba(139,92,246,0.08)",desc:"Fluent, flexible use in complex professional contexts.",focus:"Executive English — boardroom language, high-stakes negotiation, C-level register.",mod:"Use C1 level. Demand sophisticated vocabulary, idiomatic expressions, precise register. Correct subtle stylistic errors."},
+  {id:"C2",color:"#ec4899",border:"#831843",bg:"rgba(236,72,153,0.08)",desc:"Near-native mastery. Precision, style and cultural nuance.",focus:"Native-level fluency — no hesitation, perfect register, cultural nuance.",mod:"Use C2 / near-native level. Demand perfect register, cultural nuance, idiomatic sophistication. This is the final frontier."},
+];
+
+const MODES = [
+  {id:"daily",label:"Daily Conversation",icon:"☀️",color:"#3B82F6",desc:"Natural speech & real-time correction"},
+  {id:"business",label:"Business English",icon:"💼",color:"#10B981",desc:"Executive register, emails, presentations"},
+  {id:"negotiation",label:"Negotiation Sim",icon:"🤝",color:"#F59E0B",desc:"Live roleplay with full debrief"},
+  {id:"drill",label:"Fixation Drills",icon:"🧠",color:"#06b6d4",desc:"Gap fill, error correction, email builder"},
+  {id:"pronunciation",label:"Pronunciation",icon:"🎙️",color:"#8B5CF6",desc:"Stress, intonation & English rhythm"},
+  {id:"vocabulary",label:"Vocabulary",icon:"⚡",color:"#EF4444",desc:"Advanced words in your O&G context"},
+  {id:"resources",label:"Resources",icon:"📚",color:"#a78bfa",desc:"Podcasts, sites & weekly plan"},
+];
+
+const DRILLS = [
+  {id:"gap",label:"Gap Fill"},
+  {id:"error",label:"Error Correction"},
+  {id:"transform",label:"Sentence Transform"},
+  {id:"translate",label:"Express in English"},
+  {id:"email",label:"Email Builder"},
+];
+
+const RESOURCES = {
+  A1:{sites:[{name:"British Council Beginners",url:"https://learnenglish.britishcouncil.org/english-levels/a1-english",why:"Official CEFR-aligned exercises, free and trusted."},{name:"Duolingo",url:"https://www.duolingo.com",why:"10 min/day habit builder for vocabulary and basic grammar."},{name:"BBC Flatmates",url:"https://www.bbc.co.uk/worldservice/learningenglish/flatmates",why:"Short dialogues with transcripts. Perfect for A1 listening."}],podcasts:[{name:"English in 10 Minutes (BBC)",desc:"Ultra-short, clear pronunciation, basic topics."},{name:"Learn English Podcast (British Council)",desc:"Slow, clear speech designed for A1–A2 learners."}],apps:["Duolingo","Memrise (Basic)","Google Translate"],plan:"Mon: 20min Duolingo | Tue: 1 BBC dialogue | Wed: AXIOM Daily | Thu: 10 new words | Fri: AXIOM Vocabulary | Sat: Review | Sun: Rest"},
+  A2:{sites:[{name:"British Council A2",url:"https://learnenglish.britishcouncil.org/english-levels/a2-english",why:"Grammar exercises and reading texts at A2 level."},{name:"Perfect English Grammar",url:"https://www.perfect-english-grammar.com",why:"Best free grammar reference and exercise site on the web."},{name:"ESL Gold",url:"https://eslgold.com",why:"Vocabulary and grammar by topic — good for workplace English."}],podcasts:[{name:"6 Minute English (BBC)",desc:"6 minutes, one topic, full transcript. A2–B1 sweet spot."},{name:"Slow English Podcast",desc:"Native speaker, deliberately slow pace, transcripts available."}],apps:["Anki (flashcards)","Grammarly (free)","Cambridge Dictionary"],plan:"Mon: Perfect English Grammar (1 unit) | Tue: 6 Minute English | Wed: AXIOM Business | Thu: Anki (20 cards) | Fri: AXIOM Drill | Sat: Write 1 short email | Sun: Self-assess"},
+  B1:{sites:[{name:"English Club — Business English",url:"https://www.englishclub.com/business-english",why:"Workplace vocabulary, meetings, emails, phrasal verbs in context."},{name:"BBC Learning English",url:"https://www.bbc.co.uk/learningenglish",why:"News, drama, vocabulary — excellent for B1 comprehension."},{name:"Oxford Learner's Dictionary",url:"https://www.oxfordlearnersdictionaries.com",why:"Best learner's dictionary. Always check collocations."}],podcasts:[{name:"6 Minute English (BBC)",desc:"Focus on expressions and vocabulary now, not comprehension."},{name:"All Ears English",desc:"Natural American English and idioms — conversational focus."},{name:"Business English Pod ⭐",desc:"ESSENTIAL — negotiation, meetings, emails in your exact context."}],apps:["Anki","Grammarly","Speechling"],plan:"Mon: Business English Pod | Tue: AXIOM Negotiation Sim | Wed: BBC News + vocab | Thu: AXIOM Business | Fri: Write 1 business email | Sat: AXIOM Drill | Sun: Anki review"},
+  B2:{sites:[{name:"Business English Pod",url:"https://www.businessenglishpod.com",why:"Gold standard. Covers negotiation, presentations, conflict, O&G vocab."},{name:"Harvard Business Review",url:"https://hbr.org",why:"Read 1 article/week. Real executive English. Note expressions."},{name:"Macmillan Dictionary",url:"https://www.macmillandictionary.com",why:"Best for B2+ vocabulary. Shows register and frequency."}],podcasts:[{name:"Business English Pod (advanced)",desc:"C-suite communication, conflict, advanced negotiation tactics."},{name:"The Tim Ferriss Show",desc:"Native conversational English at speed. Great for rhythm."},{name:"HBR IdeaCast",desc:"Business thinking + executive English. One episode per week."},{name:"Masters of Scale (Reid Hoffman)",desc:"Sophisticated business narrative. Excellent for storytelling register."}],apps:["Anki (custom SC deck)","Grammarly Premium","Elsa Speak"],plan:"Mon: HBR article + extract 5 expressions | Tue: AXIOM Negotiation (full) | Wed: Business English Pod | Thu: AXIOM Business | Fri: Write 1 executive report section | Sat: AXIOM C1 Drill | Sun: Shadowing"},
+  C1:{sites:[{name:"The Economist",url:"https://www.economist.com",why:"Pinnacle of sophisticated written English. Read 2 articles/week."},{name:"Financial Times",url:"https://www.ft.com",why:"Business and supply chain news in C1+ English. Note collocations."},{name:"Linguee",url:"https://www.linguee.com",why:"See how real translators render complex phrases. Excellent for nuance."}],podcasts:[{name:"Acquired Podcast",desc:"Deep-dive business case studies. Long-form, sophisticated English."},{name:"Lex Fridman Podcast",desc:"Technology, science, engineering — complex ideas in natural English."},{name:"Planet Money (NPR)",desc:"Economics explained brilliantly. Great for Supply Chain / O&G context."}],apps:["Elsa Speak","Anki (idioms)","Speechace"],plan:"Mon: The Economist — 1 article, shadow-read aloud | Tue: AXIOM C1 Negotiation | Wed: Podcast (Acquired) | Thu: AXIOM Business (C1) | Fri: Write 1 executive memo | Sat: Error self-review | Sun: 20-min conversation"},
+  C2:{sites:[{name:"The Economist",url:"https://www.economist.com",why:"Now read for enjoyment and style. Imitate the writing structure."},{name:"Harvard Law — Negotiation",url:"https://www.pon.harvard.edu",why:"Academic and practical negotiation in native-level English."},{name:"TED Talks (transcript mode)",url:"https://www.ted.com",why:"Shadow the best speakers. Study delivery, not just language."}],podcasts:[{name:"Hardcore History (Dan Carlin)",desc:"Masterclass in English storytelling and sophisticated vocabulary."},{name:"The Knowledge Project (Shane Parrish)",desc:"High-level thinking + pristine executive English register."},{name:"Huberman Lab",desc:"Technical, precise scientific English — cross-domain vocabulary."}],apps:["Elsa Speak (accent)","Voice recorder","Grammarly Business"],plan:"Mon: TED Talk — watch, shadow, imitate | Tue: AXIOM Full Negotiation (C2) | Wed: Read + write 200-word opinion piece | Thu: AXIOM Board presentation roleplay | Fri: Record yourself 2 min, self-critique | Sat: Native conversation (iTalki) | Sun: Reflect on errors"},
+};
+
+const TIPS = [
+  "💡 Type DEBRIEF in Negotiation mode for your full performance score.",
+  "💡 Type PAUSE to ask a question in Portuguese.",
+  "💡 Full sentences always — more context = better correction.",
+  "💡 Don't aim for perfect — aim for communicative. Fluency comes from use.",
+  "💡 Ask AXIOM to explain any expression at any time.",
+  "💡 Check Resources tab for your level's podcasts and study sites.",
+  "💡 Upgrade your level when you score 8+/10 consistently.",
+  "💡 Business English Pod is the #1 podcast for your career goals.",
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let state = {
+  level: localStorage.getItem("axiom_level") || null,
+  mode: null,
+  drillType: "gap",
+  negRole: "CFO — questioning your department budget",
+  messages: [],
+  day: parseInt(localStorage.getItem("axiom_day") || "1"),
+  loading: false,
+  tipIdx: 0,
+  history: [], // screen history for back navigation
+};
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+  buildLevelScreen();
+  buildModeScreen();
+  buildResourcesScreen();
+  updateDayBadge();
+  startTipRotation();
+  registerSW();
+  setupInstallPrompt();
+  setupInput();
+  if (state.level) {
+    updateLevelBadge();
+    showScreen("screen-mode");
+  }
+});
+
+// ══════════════════════════════════════════
+// BUILD UI
+// ══════════════════════════════════════════
+function buildLevelScreen() {
+  const list = document.getElementById("level-list");
+  list.innerHTML = LEVELS.map(lv => `
+    <div class="level-card fade" style="border-color:${state.level===lv.id?lv.color:lv.border};background:${state.level===lv.id?lv.bg:'rgba(255,255,255,0.02)'};" onclick="selectLevel('${lv.id}')">
+      <div class="level-id" style="color:${lv.color}">${lv.id}</div>
+      <div class="level-info">
+        <div class="level-name" style="color:${lv.color}">${lv.id} — ${["Beginner","Elementary","Intermediate","Upper-Intermediate","Advanced","Mastery"][LEVELS.findIndex(l=>l.id===lv.id)]}</div>
+        <div class="level-desc">${lv.desc}</div>
+        <div class="level-focus">${lv.focus}</div>
+      </div>
+      ${state.level===lv.id?'<div class="level-check" style="color:'+lv.color+'">✓</div>':''}
+    </div>
+  `).join("");
+}
+
+function buildModeScreen() {
+  document.getElementById("mode-grid").innerHTML = MODES.map(m => `
+    <div class="mode-card" onclick="selectMode('${m.id}')">
+      <div class="mode-icon">${m.icon}</div>
+      <div class="mode-label" style="color:${m.color}">${m.label.toUpperCase()}</div>
+      <div class="mode-desc">${m.desc}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("drill-chips").innerHTML = DRILLS.map(d => `
+    <div class="chip ${state.drillType===d.id?'':''}\"
+      style="color:${state.drillType===d.id?'#06b6d4':'#2a5a5a'};border-color:${state.drillType===d.id?'#06b6d4':'#0a2a3a'};background:${state.drillType===d.id?'rgba(6,182,212,0.1)':'transparent'}"
+      onclick="selectDrill('${d.id}')">${d.label}</div>
+  `).join("");
+}
+
+function buildResourcesScreen() {
+  const tabs = document.getElementById("res-tabs");
+  const lvId = state.level || "B1";
+  tabs.innerHTML = LEVELS.map(lv => `
+    <button class="res-tab ${lv.id===lvId?'active':''}" onclick="setResLevel('${lv.id}')" id="restab-${lv.id}">${lv.id}</button>
+  `).join("");
+  renderResources(lvId);
+}
+
+function renderResources(lvId) {
+  const r = RESOURCES[lvId] || RESOURCES["B1"];
+  const lv = LEVELS.find(l=>l.id===lvId);
+  document.querySelectorAll(".res-tab").forEach(t => t.classList.remove("active"));
+  const tab = document.getElementById("restab-"+lvId);
+  if(tab) tab.classList.add("active");
+
+  document.getElementById("res-content").innerHTML = `
+    <div class="res-section">
+      <div class="res-section-title">🌐 WEBSITES & PLATFORMS</div>
+      ${r.sites.map(s=>`
+        <div class="res-card">
+          <a class="res-link" href="${s.url}" target="_blank">${s.name} ↗</a>
+          <div class="res-why" style="margin-top:4px">${s.why}</div>
+        </div>`).join("")}
+    </div>
+    <div class="res-section">
+      <div class="res-section-title">🎙️ PODCASTS</div>
+      ${r.podcasts.map(p=>`
+        <div class="res-card">
+          <div class="res-name">${p.name}</div>
+          <div class="res-why">${p.desc}</div>
+        </div>`).join("")}
+    </div>
+    <div class="res-section">
+      <div class="res-section-title">📱 APPS</div>
+      <div>${r.apps.map(a=>`<span class="app-chip">${a}</span>`).join("")}</div>
+    </div>
+    <div class="res-section" style="margin-bottom:24px">
+      <div class="res-section-title">📅 WEEKLY PLAN — ${lvId}</div>
+      <div class="res-card">
+        ${r.plan.split("|").map(row=>`<div class="plan-row">${row.trim()}</div>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function setResLevel(lvId) { renderResources(lvId); }
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  const isChat = id === "chat-screen";
+  document.getElementById("input-bar").style.display = isChat ? "block" : "none";
+  document.getElementById("btn-back").style.display = id === "screen-level" ? "none" : "block";
+}
+
+function goBack() {
+  if (document.getElementById("chat-screen").classList.contains("active")) {
+    state.messages = [];
+    state.mode = null;
+    showScreen("screen-mode");
+  } else if (document.getElementById("screen-mode").classList.contains("active") ||
+             document.getElementById("screen-resources").classList.contains("active")) {
+    showScreen("screen-level");
+    document.getElementById("btn-back").style.display = "none";
+  }
+}
+
+// ══════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════
+function selectLevel(id) {
+  state.level = id;
+  localStorage.setItem("axiom_level", id);
+  updateLevelBadge();
+  buildLevelScreen();
+  buildModeScreen();
+  document.getElementById("mode-sub").textContent = `Level ${id} · Every session builds toward C-suite fluency.`;
+  showScreen("screen-mode");
+}
+
+function selectDrill(id) {
+  state.drillType = id;
+  buildModeScreen();
+}
+
+function updateLevelBadge() {
+  const b = document.getElementById("badge-level");
+  const lv = LEVELS.find(l=>l.id===state.level);
+  if(lv){b.textContent=lv.id;b.style.display="flex";}
+}
+
+function updateDayBadge() {
+  document.getElementById("badge-day").textContent = `DAY ${state.day}`;
+  document.getElementById("day-display").textContent = `Day ${state.day}`;
+}
+
+function adjustDay(d) {
+  state.day = Math.max(1, state.day + d);
+  localStorage.setItem("axiom_day", state.day);
+  updateDayBadge();
+}
+
+function selectMode(id) {
+  if(id === "resources") { buildResourcesScreen(); showScreen("screen-resources"); return; }
+  state.mode = id;
+  state.messages = [];
+  state.negRole = document.getElementById("neg-role").value;
+  document.getElementById("messages").innerHTML = "";
+  showScreen("chat-screen");
+  startSession();
+}
+
+// ══════════════════════════════════════════
+// SYSTEM PROMPT
+// ══════════════════════════════════════════
+function buildSystemPrompt() {
+  const lv = LEVELS.find(l=>l.id===state.level) || LEVELS[2];
+  const drillLabel = DRILLS.find(d=>d.id===state.drillType)?.label || "Gap Fill";
+  const drillInstr = state.mode==="drill" ? `
+DRILL MODE: Generate 5 ${drillLabel} exercises at ${lv.id} level in Supply Chain / O&G / Port Operations context. After student answers, correct each item with explanation and give overall score X/5.` : "";
+  const negInstr = state.mode==="negotiation" ? `NEGOTIATION ROLE: Play the role of: ${state.negRole}. Start the simulation immediately after the opening ritual.` : "";
+
+  return `You are AXIOM — elite English fluency coach for Ailton Costa, Brazilian Supply Chain Manager, 20+ years in O&G, Ports and EPC, working at Porto do Açu (Prumo Logística), targeting Gerente/Coordenador Sênior roles.
+
+CURRENT LEVEL: ${lv.id}
+TEACHING DIRECTIVE: ${lv.mod}
+MODE: ${state.mode?.toUpperCase()}
+${negInstr}${drillInstr}
+
+After EVERY student message include this block:
+---
+🔬 CORRECTION LAB
+❌ You said: [exact error — skip if none]
+✅ Better: [corrected version]
+💡 Why: [brief explanation at ${lv.id} level]
+⚡ Power Phrase: [executive version]
+📈 Fluency Score: X/10
+---
+If perfect: "✅ FLAWLESS — No corrections needed."
+
+RULES:
+- Never respond in Portuguese unless student types PAUSE
+- If student writes Portuguese without PAUSE: "⚠️ English only. Try again:" then wait
+- DEBRIEF (negotiation): Language Score/10, Negotiation Score/10, 5 corrections, 3 Power Phrases
+- Reference Ailton's real context: Porto do Açu, O&G, EPC, Queiroz Galvão, R$194MM inventory
+- At A1/A2: warm, slow, encouraging. At C1/C2: demanding, precise, C-suite standard.
+
+SESSION OPENING:
+1. Greeting in English (calibrated to ${lv.id})
+2. "Day ${state.day} of your fluency journey — Level ${lv.id}"
+3. Level-appropriate warm-up question
+4. Business Expression of the Day (${lv.id} level)
+5. Negotiation Phrase of the Day (${lv.id} level)
+
+Begin immediately.`;
+}
+
+// ══════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════
+async function startSession() {
+  const initMsg = `START SESSION. Mode: ${state.mode}. Level: ${state.level}. Day: ${state.day}. Student: Ailton Costa, Supply Chain, Porto do Açu. ${state.mode==="drill"?`Drill: ${state.drillType}.`:""} Begin with opening ritual immediately.`;
+  await callAPI(initMsg, true);
+}
+
+async function sendMessage() {
+  const inp = document.getElementById("msg-input");
+  const text = inp.value.trim();
+  if(!text || state.loading) return;
+  inp.value = "";
+  inp.style.height = "auto";
+  appendMessage("user", text);
+  state.messages.push({role:"user", content:text});
+  await callAPI(null, false);
+}
+
+async function callAPI(initMsg, isInit) {
+  state.loading = true;
+  document.getElementById("send-btn").disabled = true;
+  document.getElementById("typing").style.display = "flex";
+  scrollBottom();
+
+  const messages = isInit
+    ? [{role:"user", content:initMsg}]
+    : state.messages.map(m=>({role:m.role,content:m.content}));
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        system: buildSystemPrompt(),
+        messages,
+      })
+    });
+    const data = await res.json();
+    const text = (data.content||[]).map(b=>b.text||"").join("") || "⚠️ Error. Try again.";
+    document.getElementById("typing").style.display = "none";
+    appendMessage("ai", text);
+    if(isInit) {
+      state.messages = [{role:"user",content:initMsg},{role:"assistant",content:text}];
+    } else {
+      state.messages.push({role:"assistant",content:text});
+    }
+  } catch(e) {
+    document.getElementById("typing").style.display = "none";
+    appendMessage("ai", "⚠️ Connection error. Check your internet and try again.");
+  }
+
+  state.loading = false;
+  document.getElementById("send-btn").disabled = false;
+  scrollBottom();
+}
+
+function appendMessage(role, text) {
+  const msgs = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = (role==="user" ? "msg-user" : "msg-ai") + " fade";
+  if(role === "ai") {
+    div.innerHTML = formatAI(text);
+  } else {
+    div.textContent = text;
+  }
+  msgs.appendChild(div);
+  scrollBottom();
+}
+
+function formatAI(text) {
+  return text
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g,"<em>$1</em>")
+    .replace(/🔬 CORRECTION LAB/g,'<span class="lab-hdr">🔬 CORRECTION LAB</span>')
+    .replace(/---/g,"<hr/>")
+    .replace(/\n/g,"<br/>");
+}
+
+function scrollBottom() {
+  setTimeout(() => {
+    const msgs = document.getElementById("messages");
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 50);
+}
+
+// ══════════════════════════════════════════
+// INPUT AUTO-RESIZE + ENTER
+// ══════════════════════════════════════════
+function setupInput() {
+  const inp = document.getElementById("msg-input");
+  inp.addEventListener("input", () => {
+    inp.style.height = "auto";
+    inp.style.height = Math.min(inp.scrollHeight, 120) + "px";
+  });
+  inp.addEventListener("keydown", e => {
+    if(e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+}
+
+// ══════════════════════════════════════════
+// TIPS
+// ══════════════════════════════════════════
+function startTipRotation() {
+  document.getElementById("tip").textContent = TIPS[0];
+  setInterval(() => {
+    state.tipIdx = (state.tipIdx + 1) % TIPS.length;
+    document.getElementById("tip").textContent = TIPS[state.tipIdx];
+  }, 8000);
+}
+
+// ══════════════════════════════════════════
+// SERVICE WORKER
+// ══════════════════════════════════════════
+function registerSW() {
+  if("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  }
+}
+
+// ══════════════════════════════════════════
+// INSTALL PROMPT (Android)
+// ══════════════════════════════════════════
+let deferredPrompt = null;
+function setupInstallPrompt() {
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById("install-banner").classList.add("show");
+  });
+  document.getElementById("install-btn").addEventListener("click", async () => {
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById("install-banner").classList.remove("show");
+  });
+  window.addEventListener("appinstalled", () => {
+    document.getElementById("install-banner").classList.remove("show");
+  });
+}
+</script>
+</body>
+</html>
